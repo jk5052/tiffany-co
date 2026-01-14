@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jayce Kim | Portfolio</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+            font-family: 'Times New Roman', serif;
+            cursor: none;
+            background: #000;
+        }
+
+        #canvas-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+
+        /* UI Overlay */
+        .ui-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        .header {
+            position: absolute;
+            top: 8%;
+            left: 50%;
+            transform: translateX(-50%);
+            text-align: center;
+            color: #1a1a1a;
+            text-shadow: 0 1px 2px rgba(255,255,255,0.3);
+        }
+
+        .header h1 {
+            font-size: 1.8rem;
+            font-weight: 400;
+            letter-spacing: 0.4em;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        .header .subtitle {
+            font-size: 0.7rem;
+            letter-spacing: 0.35em;
+            text-transform: uppercase;
+            opacity: 0.7;
+        }
+
+        /* Custom cursor - Tiffany Key shape */
+        .cursor {
+            position: fixed;
+            width: 50px;
+            height: 50px;
+            pointer-events: none;
+            transform: translate(-20%, -20%);
+            z-index: 1000;
+            transition: transform 0.15s ease, filter 0.2s ease;
+            filter: drop-shadow(2px 3px 3px rgba(0,0,0,0.3));
+        }
+
+        .cursor svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        .cursor.hover {
+            transform: translate(-20%, -20%) scale(1.2) rotate(-15deg);
+            filter: drop-shadow(3px 5px 5px rgba(0,0,0,0.4));
+        }
+
+        /* Tooltip for hovered box */
+        .tooltip {
+            position: fixed;
+            padding: 8px 16px;
+            background: rgba(0,0,0,0.8);
+            color: #fff;
+            font-size: 0.7rem;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            border-radius: 4px;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: 100;
+        }
+
+        .tooltip.visible {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+    <div id="canvas-container"></div>
+
+    <div class="ui-overlay">
+        <div class="header">
+            <h1>Jayce Kim</h1>
+            <p class="subtitle">Design Portfolio</p>
+        </div>
+    </div>
+
+    <div class="cursor" id="cursor">
+        <svg viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <!-- Key bow (oval head) -->
+            <ellipse cx="18" cy="18" rx="14" ry="14" fill="none" stroke="#C0C0C0" stroke-width="4"/>
+            <ellipse cx="18" cy="18" rx="14" ry="14" fill="url(#silverGradient)"/>
+            <!-- Inner hole of bow -->
+            <ellipse cx="18" cy="18" rx="6" ry="6" fill="#0ABAB5"/>
+            <!-- Key shaft -->
+            <rect x="28" y="15" width="28" height="6" rx="1" fill="url(#silverGradient)"/>
+            <!-- Key teeth -->
+            <rect x="48" y="21" width="4" height="6" fill="url(#silverGradient)"/>
+            <rect x="40" y="21" width="3" height="4" fill="url(#silverGradient)"/>
+            <!-- Gradients -->
+            <defs>
+                <linearGradient id="silverGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" style="stop-color:#E8E8E8"/>
+                    <stop offset="30%" style="stop-color:#C0C0C0"/>
+                    <stop offset="60%" style="stop-color:#A8A8A8"/>
+                    <stop offset="100%" style="stop-color:#D0D0D0"/>
+                </linearGradient>
+            </defs>
+        </svg>
+    </div>
+    <div class="tooltip" id="tooltip"></div>
+
+    <script>
+        // ============== THREE.JS SETUP ==============
+        let scene, camera, renderer;
+        let spotLights = [];
+        let mainBoxes = [];
+        let decoBoxes = [];
+        let raycaster, mouse;
+        let hoveredBox = null;
+
+        const cursor = document.getElementById('cursor');
+        const tooltip = document.getElementById('tooltip');
+        let mouseX = 0, mouseY = 0;
+        let cursorX = 0, cursorY = 0;
+
+        // Project data for main boxes
+        const projects = [
+            { name: 'Tension of Society', id: 'tension-of-society' },
+            { name: 'Eternal Promise', id: 'eternal-promise' },
+            { name: 'An Apartment', id: 'exhibition-apartment' },
+            { name: 'Luminalife', id: 'luminalife' },
+            { name: 'Ultraself', id: 'ultraself' }
+        ];
+
+        init();
+        animate();
+
+        function init() {
+            // Scene - TRUE Pantone Tiffany Blue 1837
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x0ABAB5);
+
+            // Camera - front view, see the scattered layout
+            camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 100);
+            camera.position.set(0, 0, 18);
+            camera.lookAt(0, 0, 0);
+
+            // Renderer - no tone mapping to preserve colors
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setPixelRatio(window.devicePixelRatio);
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.shadowMap.enabled = true;
+            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+            document.getElementById('canvas-container').appendChild(renderer.domElement);
+
+            // Raycaster for mouse interaction
+            raycaster = new THREE.Raycaster();
+            mouse = new THREE.Vector2();
+
+            // Lighting
+            createLighting();
+
+            // Create boxes
+            createMainBoxes();
+            createDecoBoxes();
+
+            // Event listeners
+            window.addEventListener('resize', onWindowResize);
+            window.addEventListener('mousemove', onMouseMove);
+            window.addEventListener('click', onClick);
+        }
+
+        function createLighting() {
+            // Ambient - enough to see the true colors
+            const ambient = new THREE.AmbientLight(0xffffff, 0.6);
+            scene.add(ambient);
+
+            // Main key light
+            const keyLight = new THREE.DirectionalLight(0xffffff, 0.8);
+            keyLight.position.set(5, 8, 10);
+            keyLight.castShadow = true;
+            scene.add(keyLight);
+
+            // Fill light from left
+            const fillLight = new THREE.DirectionalLight(0xffffff, 0.4);
+            fillLight.position.set(-5, 5, 5);
+            scene.add(fillLight);
+
+            // Subtle accent lights
+            const accentPositions = [
+                { x: -6, y: 3, z: 4 },
+                { x: 6, y: 3, z: 4 }
+            ];
+
+            accentPositions.forEach((pos, i) => {
+                const light = new THREE.PointLight(0xffffff, 5, 15, 2);
+                light.position.set(pos.x, pos.y, pos.z);
+                scene.add(light);
+
+                spotLights.push({
+                    light: light,
+                    basePos: { ...pos },
+                    phase: i * Math.PI,
+                    speed: 0.15
+                });
+            });
+        }
+
+        function createTiffanyBox(width, height, depth, hasKeyhole = false) {
+            const group = new THREE.Group();
+
+            // TRUE Pantone Tiffany Blue 1837
+            const tiffanyColor = 0x0ABAB5;
+
+            // Box body
+            const boxGeo = new THREE.BoxGeometry(width, height, depth);
+            const boxMat = new THREE.MeshStandardMaterial({
+                color: tiffanyColor,
+                roughness: 0.35,
+                metalness: 0.05
+            });
+            const box = new THREE.Mesh(boxGeo, boxMat);
+            box.castShadow = true;
+            box.receiveShadow = true;
+            group.add(box);
+
+            // Ribbon - horizontal
+            const ribbonH = new THREE.Mesh(
+                new THREE.BoxGeometry(width + 0.02, height * 0.15, depth + 0.02),
+                new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.4, metalness: 0.2 })
+            );
+            ribbonH.position.y = height * 0.1;
+            ribbonH.castShadow = true;
+            group.add(ribbonH);
+
+            // Ribbon - vertical
+            const ribbonV = new THREE.Mesh(
+                new THREE.BoxGeometry(width * 0.15, height + 0.02, depth + 0.02),
+                new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.4, metalness: 0.2 })
+            );
+            ribbonV.position.y = height * 0.1;
+            ribbonV.castShadow = true;
+            group.add(ribbonV);
+
+            // Keyhole for main boxes
+            if (hasKeyhole) {
+                const keyGroup = new THREE.Group();
+                const baseZ = depth / 2 + 0.02;
+
+                // Keyhole base (silver)
+                const keyholeBase = new THREE.Mesh(
+                    new THREE.CylinderGeometry(width * 0.12, width * 0.12, 0.05, 32),
+                    new THREE.MeshStandardMaterial({ color: 0xC0C0C0, roughness: 0.3, metalness: 0.8 })
+                );
+                keyholeBase.rotation.x = Math.PI / 2;
+                keyholeBase.position.set(0, height * 0.1, 0);
+                keyGroup.add(keyholeBase);
+
+                // Keyhole dark center
+                const keyholeHole = new THREE.Mesh(
+                    new THREE.CylinderGeometry(width * 0.06, width * 0.06, 0.1, 32),
+                    new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.9 })
+                );
+                keyholeHole.rotation.x = Math.PI / 2;
+                keyholeHole.position.set(0, height * 0.1, 0.01);
+                keyGroup.add(keyholeHole);
+
+                // Keyhole slot
+                const slot = new THREE.Mesh(
+                    new THREE.BoxGeometry(width * 0.03, height * 0.12, 0.1),
+                    new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.9 })
+                );
+                slot.position.set(0, height * 0.02, 0.01);
+                keyGroup.add(slot);
+
+                keyGroup.position.z = baseZ;
+                keyGroup.userData = { isKey: true, baseZ: baseZ };
+                group.add(keyGroup);
+            }
+
+            return group;
+        }
+
+        function createMainBoxes() {
+            // Main boxes - scattered layout like reference image
+            const configs = [
+                // Top right - large
+                { size: [3.0, 1.5, 3.0], pos: [2.5, 2.2, 2], rot: [0.08, 0.2, 0.04], floatSpeed: 0.6, floatAmp: 0.2 },
+                // Top center-right - medium
+                { size: [2.4, 1.2, 2.4], pos: [5.5, 1.0, 1], rot: [0.05, 0.35, -0.03], floatSpeed: 0.7, floatAmp: 0.25 },
+                // Left side - large
+                { size: [2.8, 1.4, 2.8], pos: [-4.5, 0.5, 2.5], rot: [-0.06, -0.25, 0.05], floatSpeed: 0.65, floatAmp: 0.22 },
+                // Center - medium (overlapping)
+                { size: [2.2, 1.1, 2.2], pos: [0.5, -0.3, 3], rot: [0.04, 0.15, 0.03], floatSpeed: 0.8, floatAmp: 0.18 },
+                // Bottom - smaller
+                { size: [2.5, 1.25, 2.5], pos: [-1.5, -2.0, 2], rot: [-0.03, -0.2, -0.04], floatSpeed: 0.75, floatAmp: 0.2 }
+            ];
+
+            configs.forEach((cfg, i) => {
+                const box = createTiffanyBox(cfg.size[0], cfg.size[1], cfg.size[2], true);
+                box.position.set(cfg.pos[0], cfg.pos[1], cfg.pos[2]);
+                box.rotation.set(cfg.rot[0], cfg.rot[1], cfg.rot[2]);
+                box.userData = {
+                    isClickable: true,
+                    projectIndex: i,
+                    projectName: projects[i].name,
+                    projectId: projects[i].id,
+                    baseY: cfg.pos[1],
+                    floatSpeed: cfg.floatSpeed,
+                    floatAmp: cfg.floatAmp,
+                    floatPhase: Math.random() * Math.PI * 2
+                };
+                scene.add(box);
+                mainBoxes.push(box);
+            });
+        }
+
+        function createDecoBoxes() {
+            // Background boxes - many layers for depth
+            const decoConfigs = [
+                // === LAYER 1: Very far back (z: -8 to -6) - largest, most faded ===
+                { size: [2.2, 1.1, 2.2], pos: [-8, 2, -8], rot: [0.1, 0.5, 0], floatSpeed: 0.4, floatAmp: 0.15, opacity: 0.25 },
+                { size: [2.0, 1.0, 2.0], pos: [7, 1.5, -7], rot: [-0.08, -0.4, 0], floatSpeed: 0.45, floatAmp: 0.18, opacity: 0.25 },
+                { size: [1.8, 0.9, 1.8], pos: [0, 3, -9], rot: [0.05, 0.2, 0], floatSpeed: 0.35, floatAmp: 0.2, opacity: 0.2 },
+                { size: [2.1, 1.05, 2.1], pos: [-5, -0.5, -7], rot: [0.06, 0.6, 0], floatSpeed: 0.5, floatAmp: 0.12, opacity: 0.25 },
+                { size: [1.9, 0.95, 1.9], pos: [5.5, 0, -8], rot: [-0.04, -0.5, 0], floatSpeed: 0.42, floatAmp: 0.16, opacity: 0.22 },
+                { size: [1.7, 0.85, 1.7], pos: [-2, 4, -8], rot: [0.08, 0.3, 0], floatSpeed: 0.38, floatAmp: 0.22, opacity: 0.2 },
+                { size: [1.6, 0.8, 1.6], pos: [3, 3.5, -7.5], rot: [-0.06, -0.35, 0], floatSpeed: 0.48, floatAmp: 0.19, opacity: 0.23 },
+
+                // === LAYER 2: Mid-far back (z: -5 to -3) ===
+                { size: [1.5, 0.75, 1.5], pos: [-6.5, 1, -5], rot: [0.07, 0.55, 0.03], floatSpeed: 0.55, floatAmp: 0.2, opacity: 0.35 },
+                { size: [1.4, 0.7, 1.4], pos: [6, 2.5, -4.5], rot: [-0.05, -0.45, 0.02], floatSpeed: 0.6, floatAmp: 0.22, opacity: 0.35 },
+                { size: [1.3, 0.65, 1.3], pos: [0, 0.5, -5], rot: [0.04, 0.15, -0.02], floatSpeed: 0.52, floatAmp: 0.18, opacity: 0.38 },
+                { size: [1.35, 0.67, 1.35], pos: [-4, 3, -4], rot: [0.06, 0.7, 0.04], floatSpeed: 0.58, floatAmp: 0.24, opacity: 0.32 },
+                { size: [1.25, 0.62, 1.25], pos: [4.5, -0.3, -5.5], rot: [-0.03, -0.6, -0.03], floatSpeed: 0.62, floatAmp: 0.17, opacity: 0.36 },
+                { size: [1.2, 0.6, 1.2], pos: [-7, -1, -4], rot: [0.05, 0.4, 0.02], floatSpeed: 0.65, floatAmp: 0.15, opacity: 0.33 },
+                { size: [1.15, 0.57, 1.15], pos: [7.5, 0.8, -5], rot: [-0.04, -0.5, 0], floatSpeed: 0.57, floatAmp: 0.2, opacity: 0.34 },
+
+                // === LAYER 3: Near-mid (z: -2 to 0) ===
+                { size: [1.1, 0.55, 1.1], pos: [-5.5, 2, -2], rot: [0.08, 0.6, 0.04], floatSpeed: 0.7, floatAmp: 0.22, opacity: 0.45 },
+                { size: [1.0, 0.5, 1.0], pos: [5, 1.8, -2.5], rot: [-0.06, -0.5, 0.03], floatSpeed: 0.72, floatAmp: 0.25, opacity: 0.45 },
+                { size: [0.95, 0.47, 0.95], pos: [0.5, 3.5, -3], rot: [0.04, 0.2, -0.02], floatSpeed: 0.55, floatAmp: 0.28, opacity: 0.42 },
+                { size: [1.05, 0.52, 1.05], pos: [-3.5, -0.8, -1.5], rot: [0.05, 0.45, 0.03], floatSpeed: 0.75, floatAmp: 0.18, opacity: 0.48 },
+                { size: [0.9, 0.45, 0.9], pos: [3.8, 2.8, -1], rot: [-0.04, -0.4, -0.02], floatSpeed: 0.68, floatAmp: 0.2, opacity: 0.46 },
+
+                // === LAYER 4: Edges/Sides (visible periphery) ===
+                { size: [0.85, 0.42, 0.85], pos: [-7, 0, 1], rot: [0.06, 0.7, 0.05], floatSpeed: 0.8, floatAmp: 0.2, opacity: 0.5 },
+                { size: [0.8, 0.4, 0.8], pos: [6.5, -0.5, 2], rot: [-0.05, -0.55, -0.03], floatSpeed: 0.85, floatAmp: 0.22, opacity: 0.5 },
+                { size: [0.75, 0.37, 0.75], pos: [-6, 3.5, 0], rot: [0.07, 0.5, 0.04], floatSpeed: 0.78, floatAmp: 0.26, opacity: 0.48 },
+                { size: [0.7, 0.35, 0.7], pos: [5.8, 3.2, 0.5], rot: [-0.04, -0.45, 0.02], floatSpeed: 0.82, floatAmp: 0.24, opacity: 0.52 },
+
+                // === Small accents scattered high ===
+                { size: [0.65, 0.32, 0.65], pos: [-2.5, 4.5, -4], rot: [0.1, 0.8, 0.06], floatSpeed: 0.6, floatAmp: 0.32, opacity: 0.35 },
+                { size: [0.6, 0.3, 0.6], pos: [2.2, 4.2, -3.5], rot: [-0.08, -0.7, -0.04], floatSpeed: 0.65, floatAmp: 0.3, opacity: 0.38 },
+                { size: [0.55, 0.27, 0.55], pos: [0, 5, -6], rot: [0.05, 0.25, 0.02], floatSpeed: 0.5, floatAmp: 0.35, opacity: 0.28 },
+                { size: [0.5, 0.25, 0.5], pos: [-4, 4.8, -5], rot: [0.06, 0.6, 0.03], floatSpeed: 0.55, floatAmp: 0.33, opacity: 0.3 },
+                { size: [0.5, 0.25, 0.5], pos: [4.5, 4.5, -5.5], rot: [-0.05, -0.55, -0.02], floatSpeed: 0.58, floatAmp: 0.28, opacity: 0.32 },
+            ];
+
+            decoConfigs.forEach((cfg) => {
+                const box = createTiffanyBox(cfg.size[0], cfg.size[1], cfg.size[2], false);
+                box.position.set(cfg.pos[0], cfg.pos[1], cfg.pos[2]);
+                box.rotation.set(cfg.rot[0], cfg.rot[1], cfg.rot[2]);
+
+                // Apply depth-based opacity
+                const opacity = cfg.opacity || 0.5;
+                box.traverse((child) => {
+                    if (child.isMesh) {
+                        child.material = child.material.clone();
+                        child.material.transparent = true;
+                        child.material.opacity = opacity;
+                    }
+                });
+
+                box.userData = {
+                    isClickable: false,
+                    baseY: cfg.pos[1],
+                    floatSpeed: cfg.floatSpeed,
+                    floatAmp: cfg.floatAmp,
+                    floatPhase: Math.random() * Math.PI * 2
+                };
+                scene.add(box);
+                decoBoxes.push(box);
+            });
+        }
+
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        function onMouseMove(event) {
+            mouseX = event.clientX;
+            mouseY = event.clientY;
+
+            // Update mouse for raycaster
+            mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+            mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+        }
+
+        function onClick() {
+            if (hoveredBox && hoveredBox.userData.isClickable) {
+                const projectId = hoveredBox.userData.projectId;
+                const projectName = hoveredBox.userData.projectName;
+                console.log('Opening:', projectId);
+                alert(`Opening: ${projectName}\n\nConnect to your project page here.`);
+            }
+        }
+
+        function updateCursor() {
+            const dx = mouseX - cursorX;
+            const dy = mouseY - cursorY;
+            cursorX += dx * 0.12;
+            cursorY += dy * 0.12;
+            cursor.style.left = cursorX + 'px';
+            cursor.style.top = cursorY + 'px';
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+
+            const time = performance.now() / 1000;
+
+            // Animate floating boxes - like balloons
+            [...mainBoxes, ...decoBoxes].forEach((box) => {
+                const { baseY, floatSpeed, floatAmp, floatPhase } = box.userData;
+                if (baseY !== undefined) {
+                    // Gentle floating up and down
+                    box.position.y = baseY + Math.sin(time * floatSpeed + floatPhase) * floatAmp;
+                    // Subtle rotation sway
+                    box.rotation.z = Math.sin(time * floatSpeed * 0.5 + floatPhase) * 0.03;
+                    box.rotation.x = box.rotation.x + Math.sin(time * floatSpeed * 0.3) * 0.002;
+                }
+            });
+
+            // Subtle light movement
+            spotLights.forEach((sl, i) => {
+                sl.light.position.x = sl.basePos.x + Math.sin(time * sl.speed + sl.phase) * 1.5;
+                sl.light.position.y = sl.basePos.y + Math.cos(time * sl.speed * 0.7) * 0.5;
+            });
+
+            // Raycaster for hover detection
+            raycaster.setFromCamera(mouse, camera);
+            const intersects = raycaster.intersectObjects(mainBoxes, true);
+
+            // Reset previous hover
+            if (hoveredBox) {
+                hoveredBox.scale.set(1, 1, 1);
+                cursor.classList.remove('hover');
+                tooltip.classList.remove('visible');
+                // Reset key animation
+                hoveredBox.traverse((child) => {
+                    if (child.userData && child.userData.isKey) {
+                        child.position.z = child.userData.baseZ;
+                    }
+                });
+            }
+
+            if (intersects.length > 0) {
+                // Find parent group
+                let obj = intersects[0].object;
+                while (obj.parent && !obj.userData.isClickable) {
+                    obj = obj.parent;
+                }
+
+                if (obj.userData.isClickable) {
+                    hoveredBox = obj;
+                    hoveredBox.scale.set(1.08, 1.08, 1.08);
+                    cursor.classList.add('hover');
+
+                    // Animate keyhole - bobbing
+                    hoveredBox.traverse((child) => {
+                        if (child.userData && child.userData.isKey) {
+                            child.position.z = child.userData.baseZ + Math.sin(time * 4) * 0.05 + 0.1;
+                        }
+                    });
+
+                    // Show tooltip
+                    tooltip.textContent = hoveredBox.userData.projectName;
+                    tooltip.style.left = (mouseX + 20) + 'px';
+                    tooltip.style.top = (mouseY - 20) + 'px';
+                    tooltip.classList.add('visible');
+                }
+            } else {
+                hoveredBox = null;
+            }
+
+            // Update cursor
+            updateCursor();
+
+            renderer.render(scene, camera);
+        }
+    </script>
+</body>
+</html>
