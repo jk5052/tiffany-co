@@ -47,8 +47,8 @@
             left: 50%;
             transform: translateX(-50%);
             text-align: center;
-            color: #1a1a1a;
-            text-shadow: 0 1px 2px rgba(255,255,255,0.3);
+            color: #fff;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
         }
 
         .header h1 {
@@ -107,6 +107,102 @@
         .tooltip.visible {
             opacity: 1;
         }
+
+        /* Art Modal Overlay - Tiffany White Gallery Style */
+        .art-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(180deg, #f5f5f5 0%, #e8e8e8 50%, #d8d8d8 100%);
+            z-index: 500;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.5s ease, visibility 0.5s ease;
+            overflow-y: auto;
+            cursor: auto;
+        }
+
+        .art-modal.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .art-modal-content {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 80px 60px;
+        }
+
+        .art-modal-close {
+            position: fixed;
+            top: 30px;
+            right: 40px;
+            font-size: 1.8rem;
+            color: #888;
+            cursor: pointer;
+            z-index: 501;
+            transition: all 0.3s ease;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.8);
+            box-shadow: 0 2px 15px rgba(0,0,0,0.1);
+        }
+
+        .art-modal-close:hover {
+            transform: scale(1.1);
+            color: #0ABAB5;
+        }
+
+        .art-modal-title {
+            text-align: center;
+            color: #0ABAB5;
+            font-size: 1.5rem;
+            letter-spacing: 0.4em;
+            margin-bottom: 80px;
+            font-weight: 300;
+            text-transform: uppercase;
+        }
+
+        .art-item {
+            margin-bottom: 100px;
+            background: #fff;
+            padding: 40px;
+            box-shadow: 0 10px 60px rgba(0,0,0,0.08);
+        }
+
+        .art-item img, .art-item video {
+            width: 100%;
+            height: auto;
+            display: block;
+            margin-bottom: 30px;
+            box-shadow: 0 5px 30px rgba(0,0,0,0.1);
+        }
+
+        .art-item-title {
+            color: #333;
+            font-size: 1.1rem;
+            letter-spacing: 0.25em;
+            margin-bottom: 18px;
+            font-weight: 400;
+            text-transform: uppercase;
+            border-bottom: 1px solid #0ABAB5;
+            padding-bottom: 12px;
+            display: inline-block;
+        }
+
+        .art-item-desc {
+            color: #666;
+            font-size: 0.95rem;
+            line-height: 2;
+            letter-spacing: 0.02em;
+            font-weight: 300;
+        }
     </style>
 </head>
 <body>
@@ -116,6 +212,72 @@
         <div class="header">
             <h1>Jayce Kim</h1>
             <p class="subtitle">Design Portfolio</p>
+        </div>
+    </div>
+
+    <!-- Art Modal -->
+    <div class="art-modal" id="artModal">
+        <div class="art-modal-close" id="artModalClose">✕</div>
+        <div class="art-modal-content">
+            <h2 class="art-modal-title">ART</h2>
+
+            <div class="art-item">
+                <img src="pic/Wishes.jpg" alt="Wishes">
+                <h3 class="art-item-title">Wishes</h3>
+                <p class="art-item-desc">Inspired by gun-related tragedies, this piece imagines a world where firearms become harmless—combining the imagery of bullets falling to the ground with the ritual of lighting candles as a collective prayer for peace.</p>
+            </div>
+
+            <div class="art-item">
+                <img src="pic/Misty.jpg" alt="Misty">
+                <h3 class="art-item-title">Misty</h3>
+                <p class="art-item-desc">This piece invites viewers to walk into the fog toward an elusive light, exploring how perfect communication may be impossible yet encouraging us to recognize each person as a unique world and look at one another without judgment.</p>
+            </div>
+
+            <div class="art-item">
+                <img src="pic/Empower.jpg" alt="Empower">
+                <h3 class="art-item-title">Empower</h3>
+                <p class="art-item-desc">This piece examines how modern individuals unknowingly diminish themselves, prompting reflection on what it truly takes to reclaim one's self-esteem.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Interactive Installation Modal -->
+    <div class="art-modal" id="installationModal">
+        <div class="art-modal-close" id="installationModalClose">✕</div>
+        <div class="art-modal-content">
+            <h2 class="art-modal-title">INTERACTIVE INSTALLATION</h2>
+
+            <div class="art-item">
+                <img src="pic/Tension_of_Society.jpg" alt="Tension of Society">
+                <h3 class="art-item-title">Tension of Society</h3>
+                <p class="art-item-desc">This installation explores emotional memory—how the brain ties experiences to emotions through the connection between the hippocampus and amygdala. Using sound as a trigger for recall, the piece plays audio from Korean social tragedies such as the Sewol ferry sinking and the Daegu subway fire. As viewers listen with limited vision, a heartbeat sensor tracks their physiological response; when their heart rate crosses a threshold, the cube illuminates LED strips, creating a cumulative visual record of collective emotional resonance.</p>
+            </div>
+
+            <div class="art-item">
+                <img src="pic/Eternal_Promise.jpg" alt="Eternal Promise">
+                <h3 class="art-item-title">Eternal Promise</h3>
+                <p class="art-item-desc">Using sensor technology, this interactive installation dissolves video imagery into particle-like atoms as viewers approach, then returns to scenes of nature when they step away—evoking the eternal cycle of matter in the universe. The piece reflects on how our loved ones, though no longer in their original form, continue to exist as atoms woven into the air we breathe, the trees we see, and the stars above, offering comfort that the bonds we share are never truly broken and that love persists beyond physical existence.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Technology Modal -->
+    <div class="art-modal" id="techModal">
+        <div class="art-modal-close" id="techModalClose">✕</div>
+        <div class="art-modal-content">
+            <h2 class="art-modal-title">TECHNOLOGY</h2>
+
+            <div class="art-item">
+                <img src="pic/I_in_You.jpg" alt="I in You">
+                <h3 class="art-item-title">I in You</h3>
+                <p class="art-item-desc">This piece captures the moment when observation and being observed dissolve the boundaries between self and other. It reflects on how we are constantly shaped by the people we meet and experiences we encounter—absorbing diverse perspectives, values, and behaviors over time. The work invites us to see the self not as fixed, but as a fluid composite formed within a dynamic network of relationships, loves, and shared experiences.</p>
+            </div>
+
+            <div class="art-item">
+                <video src="pic/Breath_Spirit.MOV" controls playsinline style="width:100%; display:block; margin-bottom:20px;"></video>
+                <h3 class="art-item-title">Breath Spirit</h3>
+                <p class="art-item-desc">Breath Spirit helps you build healthy breathing habits through guided pattern training, personalized meditation reminders, and progress tracking. By analyzing your breathing data, it predicts health trends and offers tailored recommendations—helping you reflect on your progress and develop a sustainable practice uniquely suited to you.</p>
+            </div>
         </div>
     </div>
 
@@ -160,32 +322,28 @@
 
         // Project data for main boxes
         const projects = [
-            { name: 'Tension of Society', id: 'tension-of-society' },
-            { name: 'Eternal Promise', id: 'eternal-promise' },
-            { name: 'An Apartment', id: 'exhibition-apartment' },
-            { name: 'Luminalife', id: 'luminalife' },
-            { name: 'Ultraself', id: 'ultraself' }
+            { name: 'ART', id: 'art' },
+            { name: 'Interactive Installation', id: 'interactive-installation' },
+            { name: 'Technology', id: 'technology' }
         ];
 
         init();
         animate();
 
         function init() {
-            // Scene - TRUE Pantone Tiffany Blue 1837
+            // Scene - Light background for illustration style
             scene = new THREE.Scene();
-            scene.background = new THREE.Color(0x0ABAB5);
+            scene.background = new THREE.Color(0x81D8D0);
 
             // Camera - front view, see the scattered layout
             camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 100);
             camera.position.set(0, 0, 18);
             camera.lookAt(0, 0, 0);
 
-            // Renderer - no tone mapping to preserve colors
+            // Renderer - clean for toon style
             renderer = new THREE.WebGLRenderer({ antialias: true });
             renderer.setPixelRatio(window.devicePixelRatio);
             renderer.setSize(window.innerWidth, window.innerHeight);
-            renderer.shadowMap.enabled = true;
-            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
             document.getElementById('canvas-container').appendChild(renderer.domElement);
 
             // Raycaster for mouse interaction
@@ -206,18 +364,17 @@
         }
 
         function createLighting() {
-            // Ambient - enough to see the true colors
-            const ambient = new THREE.AmbientLight(0xffffff, 0.6);
+            // Strong ambient for flat illustration look
+            const ambient = new THREE.AmbientLight(0xffffff, 1.0);
             scene.add(ambient);
 
-            // Main key light
-            const keyLight = new THREE.DirectionalLight(0xffffff, 0.8);
+            // Soft directional for subtle shading
+            const keyLight = new THREE.DirectionalLight(0xffffff, 0.5);
             keyLight.position.set(5, 8, 10);
-            keyLight.castShadow = true;
             scene.add(keyLight);
 
             // Fill light from left
-            const fillLight = new THREE.DirectionalLight(0xffffff, 0.4);
+            const fillLight = new THREE.DirectionalLight(0xffffff, 0.3);
             fillLight.position.set(-5, 5, 5);
             scene.add(fillLight);
 
@@ -244,91 +401,88 @@
         function createTiffanyBox(width, height, depth, hasKeyhole = false) {
             const group = new THREE.Group();
 
-            // TRUE Pantone Tiffany Blue 1837
-            const tiffanyColor = 0x0ABAB5;
+            // Tiffany Blue - illustration style
+            const tiffanyColor = 0x81D8D0;
+            const outlineColor = 0x444444;
+
+            // Flat material (MeshBasicMaterial for clean flat look)
+            const boxMat = new THREE.MeshBasicMaterial({ color: tiffanyColor });
 
             // Box body
             const boxGeo = new THREE.BoxGeometry(width, height, depth);
-            const boxMat = new THREE.MeshStandardMaterial({
-                color: tiffanyColor,
-                roughness: 0.35,
-                metalness: 0.05
-            });
             const box = new THREE.Mesh(boxGeo, boxMat);
-            box.castShadow = true;
-            box.receiveShadow = true;
             group.add(box);
 
-            // Ribbon - horizontal
-            const ribbonH = new THREE.Mesh(
-                new THREE.BoxGeometry(width + 0.02, height * 0.15, depth + 0.02),
-                new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.4, metalness: 0.2 })
-            );
-            ribbonH.position.y = height * 0.1;
-            ribbonH.castShadow = true;
+            // Black outline
+            const edges = new THREE.EdgesGeometry(boxGeo);
+            const lineMat = new THREE.LineBasicMaterial({ color: outlineColor });
+            const outline = new THREE.LineSegments(edges, lineMat);
+            group.add(outline);
+
+            // White ribbon material
+            const ribbonMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+
+            // Ribbon - horizontal (across the box)
+            const ribbonHGeo = new THREE.BoxGeometry(width + 0.05, height * 0.12, depth + 0.05);
+            const ribbonH = new THREE.Mesh(ribbonHGeo, ribbonMat);
+            ribbonH.position.y = 0;
             group.add(ribbonH);
+            group.add(new THREE.LineSegments(new THREE.EdgesGeometry(ribbonHGeo), lineMat));
 
-            // Ribbon - vertical
-            const ribbonV = new THREE.Mesh(
-                new THREE.BoxGeometry(width * 0.15, height + 0.02, depth + 0.02),
-                new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.4, metalness: 0.2 })
-            );
-            ribbonV.position.y = height * 0.1;
-            ribbonV.castShadow = true;
+            // Ribbon - vertical (across the box)
+            const ribbonVGeo = new THREE.BoxGeometry(width * 0.12, height + 0.05, depth + 0.05);
+            const ribbonV = new THREE.Mesh(ribbonVGeo, ribbonMat);
+            ribbonV.position.y = 0;
             group.add(ribbonV);
+            group.add(new THREE.LineSegments(new THREE.EdgesGeometry(ribbonVGeo), lineMat));
 
-            // Keyhole for main boxes
-            if (hasKeyhole) {
-                const keyGroup = new THREE.Group();
-                const baseZ = depth / 2 + 0.02;
+            // === BOW on top (ellipsoid loops) ===
+            const bowY = height / 2 + height * 0.02;
 
-                // Keyhole base (silver)
-                const keyholeBase = new THREE.Mesh(
-                    new THREE.CylinderGeometry(width * 0.12, width * 0.12, 0.05, 32),
-                    new THREE.MeshStandardMaterial({ color: 0xC0C0C0, roughness: 0.3, metalness: 0.8 })
-                );
-                keyholeBase.rotation.x = Math.PI / 2;
-                keyholeBase.position.set(0, height * 0.1, 0);
-                keyGroup.add(keyholeBase);
+            // Left loop (squashed sphere = ellipsoid)
+            const loopGeo = new THREE.SphereGeometry(width * 0.18, 16, 12);
+            const leftLoop = new THREE.Mesh(loopGeo, ribbonMat);
+            leftLoop.scale.set(1.2, 0.5, 0.3); // flatten it
+            leftLoop.position.set(-width * 0.15, bowY + height * 0.06, 0);
+            group.add(leftLoop);
 
-                // Keyhole dark center
-                const keyholeHole = new THREE.Mesh(
-                    new THREE.CylinderGeometry(width * 0.06, width * 0.06, 0.1, 32),
-                    new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.9 })
-                );
-                keyholeHole.rotation.x = Math.PI / 2;
-                keyholeHole.position.set(0, height * 0.1, 0.01);
-                keyGroup.add(keyholeHole);
+            // Right loop
+            const rightLoop = new THREE.Mesh(loopGeo, ribbonMat);
+            rightLoop.scale.set(1.2, 0.5, 0.3);
+            rightLoop.position.set(width * 0.15, bowY + height * 0.06, 0);
+            group.add(rightLoop);
 
-                // Keyhole slot
-                const slot = new THREE.Mesh(
-                    new THREE.BoxGeometry(width * 0.03, height * 0.12, 0.1),
-                    new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.9 })
-                );
-                slot.position.set(0, height * 0.02, 0.01);
-                keyGroup.add(slot);
+            // Center knot (small sphere)
+            const knotGeo = new THREE.SphereGeometry(width * 0.08, 12, 8);
+            const knot = new THREE.Mesh(knotGeo, ribbonMat);
+            knot.scale.set(1, 0.6, 0.6);
+            knot.position.set(0, bowY + height * 0.04, 0);
+            group.add(knot);
 
-                keyGroup.position.z = baseZ;
-                keyGroup.userData = { isKey: true, baseZ: baseZ };
-                group.add(keyGroup);
-            }
+            // Ribbon tails (thin boxes hanging down)
+            const tailGeo = new THREE.BoxGeometry(width * 0.06, height * 0.2, depth * 0.02);
+            const leftTail = new THREE.Mesh(tailGeo, ribbonMat);
+            leftTail.rotation.z = 0.25;
+            leftTail.position.set(-width * 0.06, bowY - height * 0.08, 0);
+            group.add(leftTail);
+
+            const rightTail = new THREE.Mesh(tailGeo, ribbonMat);
+            rightTail.rotation.z = -0.25;
+            rightTail.position.set(width * 0.06, bowY - height * 0.08, 0);
+            group.add(rightTail);
 
             return group;
         }
 
         function createMainBoxes() {
-            // Main boxes - scattered layout like reference image
+            // 3 Main boxes - BIG, scattered layout
             const configs = [
-                // Top right - large
-                { size: [3.0, 1.5, 3.0], pos: [2.5, 2.2, 2], rot: [0.08, 0.2, 0.04], floatSpeed: 0.6, floatAmp: 0.2 },
-                // Top center-right - medium
-                { size: [2.4, 1.2, 2.4], pos: [5.5, 1.0, 1], rot: [0.05, 0.35, -0.03], floatSpeed: 0.7, floatAmp: 0.25 },
-                // Left side - large
-                { size: [2.8, 1.4, 2.8], pos: [-4.5, 0.5, 2.5], rot: [-0.06, -0.25, 0.05], floatSpeed: 0.65, floatAmp: 0.22 },
-                // Center - medium (overlapping)
-                { size: [2.2, 1.1, 2.2], pos: [0.5, -0.3, 3], rot: [0.04, 0.15, 0.03], floatSpeed: 0.8, floatAmp: 0.18 },
-                // Bottom - smaller
-                { size: [2.5, 1.25, 2.5], pos: [-1.5, -2.0, 2], rot: [-0.03, -0.2, -0.04], floatSpeed: 0.75, floatAmp: 0.2 }
+                // Left - ART
+                { size: [4.0, 2.0, 4.0], pos: [-4.5, 0.8, 3], rot: [-0.06, -0.2, 0.04], floatSpeed: 0.6, floatAmp: 0.25 },
+                // Center top - Interactive Installation
+                { size: [4.5, 2.25, 4.5], pos: [1.5, 1.5, 2], rot: [0.07, 0.15, 0.03], floatSpeed: 0.55, floatAmp: 0.2 },
+                // Right bottom - Technology
+                { size: [3.8, 1.9, 3.8], pos: [5, -1.2, 3.5], rot: [0.05, 0.25, -0.04], floatSpeed: 0.65, floatAmp: 0.22 }
             ];
 
             configs.forEach((cfg, i) => {
@@ -434,12 +588,56 @@
             mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
         }
 
+        const artModal = document.getElementById('artModal');
+        const artModalClose = document.getElementById('artModalClose');
+        const installationModal = document.getElementById('installationModal');
+        const installationModalClose = document.getElementById('installationModalClose');
+        const techModal = document.getElementById('techModal');
+        const techModalClose = document.getElementById('techModalClose');
+
+        artModalClose.addEventListener('click', () => {
+            artModal.classList.remove('visible');
+        });
+
+        artModal.addEventListener('click', (e) => {
+            if (e.target === artModal) {
+                artModal.classList.remove('visible');
+            }
+        });
+
+        installationModalClose.addEventListener('click', () => {
+            installationModal.classList.remove('visible');
+        });
+
+        installationModal.addEventListener('click', (e) => {
+            if (e.target === installationModal) {
+                installationModal.classList.remove('visible');
+            }
+        });
+
+        techModalClose.addEventListener('click', () => {
+            techModal.classList.remove('visible');
+        });
+
+        techModal.addEventListener('click', (e) => {
+            if (e.target === techModal) {
+                techModal.classList.remove('visible');
+            }
+        });
+
         function onClick() {
             if (hoveredBox && hoveredBox.userData.isClickable) {
                 const projectId = hoveredBox.userData.projectId;
                 const projectName = hoveredBox.userData.projectName;
                 console.log('Opening:', projectId);
-                alert(`Opening: ${projectName}\n\nConnect to your project page here.`);
+
+                if (projectId === 'art') {
+                    artModal.classList.add('visible');
+                } else if (projectId === 'interactive-installation') {
+                    installationModal.classList.add('visible');
+                } else if (projectId === 'technology') {
+                    techModal.classList.add('visible');
+                }
             }
         }
 
